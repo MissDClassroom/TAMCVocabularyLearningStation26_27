@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AMC Vocab Hub</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Same skin as the vocab pages: light = Aurora (frosted glass on colour blobs), dark = Neon.
+   Layout: header, then one band per section, each a grid of tool tiles with the student's own progress. */
+:root{
+  --bg:#f3f0ff; --surface:rgba(255,255,255,.72); --sunk:rgba(120,90,220,.08); --ink:#1d1a3a; --muted:#5d5a80; --bd:rgba(255,255,255,.85);
+  --primary:#6d4cff; --grad:linear-gradient(120deg,#6d4cff,#e0559b); --title:linear-gradient(100deg,#6d4cff,#e0559b 60%,#14a89a);
+  --blob1:#c7b6ff; --blob2:#9fe7e0; --blob3:#ffc2d9;
+  --shadow:0 12px 32px rgba(70,40,160,.12); --shadow-h:0 18px 40px rgba(70,40,160,.2);
+  --d1:#1a7fd9; --d2:#f0533f; --d3:#7a3ff0; --d4:#0f9a74; --d5:#d23f8a; --d6:#c27a00; --d7:#0a8f8f; --d8:#4558e6;
+  --display:"Outfit",system-ui,sans-serif; --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+:root[data-theme="dark"]{
+  --bg:#0a0a18; --surface:#14142a; --sunk:#1b1b36; --ink:#eef0ff; --muted:#9a9cc8; --bd:#2f2f5a;
+  --primary:#00e5ff; --grad:linear-gradient(90deg,#00e5ff,#b26bff); --title:linear-gradient(90deg,#00e5ff,#b26bff,#ff4d8d);
+  --blob1:rgba(178,107,255,.18); --blob2:rgba(0,229,255,.14); --blob3:transparent;
+  --shadow:0 10px 30px rgba(0,0,0,.45); --shadow-h:0 0 24px rgba(178,107,255,.45);
+  --d1:#00e5ff; --d2:#ff4d8d; --d3:#b26bff; --d4:#3dffa2; --d5:#ff9df0; --d6:#ffd24d; --d7:#4dfff0; --d8:#8c9bff; color-scheme:dark}
+@media (prefers-color-scheme: dark){:root:not([data-theme]){
+  --bg:#0a0a18; --surface:#14142a; --sunk:#1b1b36; --ink:#eef0ff; --muted:#9a9cc8; --bd:#2f2f5a;
+  --primary:#00e5ff; --grad:linear-gradient(90deg,#00e5ff,#b26bff); --title:linear-gradient(90deg,#00e5ff,#b26bff,#ff4d8d);
+  --blob1:rgba(178,107,255,.18); --blob2:rgba(0,229,255,.14); --blob3:transparent;
+  --shadow:0 10px 30px rgba(0,0,0,.45); --shadow-h:0 0 24px rgba(178,107,255,.45);
+  --d1:#00e5ff; --d2:#ff4d8d; --d3:#b26bff; --d4:#3dffa2; --d5:#ff9df0; --d6:#ffd24d; --d7:#4dfff0; --d8:#8c9bff; color-scheme:dark}}
+
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--body);font-size:17px;line-height:1.5;color:var(--ink);
+  background:radial-gradient(40vw 40vw at 8% 10%,var(--blob1),transparent 70%),radial-gradient(45vw 45vw at 95% 25%,var(--blob2),transparent 70%),radial-gradient(50vw 50vw at 50% 105%,var(--blob3),transparent 70%),var(--bg);background-attachment:fixed;min-height:100%}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:18px;padding-block:28px 70px;display:flex;flex-direction:column;gap:30px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-.015em}
+h1{font-size:2.6em;font-weight:800;line-height:1;background:var(--title);-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{font-size:1.35em;font-weight:800}
+h3{font-size:1.12em;font-weight:600;line-height:1.2}
+p{margin:0}
+.eyebrow{font-family:var(--mono);font-size:.72em;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--primary);outline-offset:3px}
+
+.top{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:flex-start}
+.top .t{display:flex;flex-direction:column;gap:8px;max-width:62ch}
+.top .t p{color:var(--muted)}
+.modetog{display:flex;border:1px solid var(--bd);border-radius:999px;background:var(--surface);padding:3px;gap:2px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.modetog button{border:0;background:none;border-radius:999px;padding:.25em .8em;font-weight:700;font-size:.85em;color:var(--muted)}
+.modetog button[aria-pressed="true"]{background:var(--grad);color:#fff}
+:root[data-theme="dark"] .modetog button[aria-pressed="true"]{color:#07071a}
+
+section.band{display:flex;flex-direction:column;gap:14px}
+.bandhead{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.bandhead p{color:var(--muted);font-size:.9em}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr));gap:16px}
+.tile{position:relative;display:flex;flex-direction:column;gap:10px;padding:18px;border-radius:24px;border:1px solid var(--bd);background:var(--surface);box-shadow:var(--shadow);text-decoration:none;color:var(--ink);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);transition:transform .15s,box-shadow .15s;min-width:0}
+a.tile:hover{transform:translateY(-3px);box-shadow:var(--shadow-h)}
+:root[data-theme="dark"] a.tile:hover{border-color:var(--c)}
+.tile .ic{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;font-size:1.45em;background:var(--c);box-shadow:0 6px 16px color-mix(in srgb,var(--c) 35%,transparent)}
+.tile .desc{font-size:.88em;color:var(--muted);flex:1}
+.tile .kind{position:absolute;top:16px;right:16px;font-family:var(--mono);font-size:.66em;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:.15em .6em;background:var(--sunk);color:var(--muted)}
+.prog{display:flex;flex-direction:column;gap:4px}
+.bar{height:8px;border-radius:6px;background:var(--sunk);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--c);border-radius:6px}
+.prog span{font-family:var(--mono);font-size:.72em;color:var(--muted)}
+.open{font-weight:700;font-size:.88em;color:var(--primary)}
+.tile.soon{opacity:.55;box-shadow:none;border-style:dashed}
+.tile.soon .ic{filter:grayscale(.6)}
+.notice{display:flex;gap:14px;align-items:flex-start;padding:14px 18px;border-radius:20px;border:1px solid var(--bd);background:var(--surface);box-shadow:var(--shadow);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);max-width:760px}
+.notice .ni{font-size:1.6em;line-height:1}
+.notice b{font-family:var(--display);font-weight:600}
+.foot{color:var(--muted);font-size:.82em;border-top:1px solid var(--bd);padding-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="t">
+      <span class="eyebrow">Terminale LLCER AMC · Anglais Monde Contemporain</span>
+      <h1>AMC Vocab Hub</h1>
+      <p>Learn the words you need for the synthesis, one lab at a time. Pick a lab, play, and watch your progress grow.</p>
+    </div>
+    <div class="modetog" role="group" aria-label="Light or dark mode"><button data-mode-pick="light">☀️ Light</button><button data-mode-pick="dark">🌙 Dark</button></div>
+  </header>
+  <aside class="notice"><span class="ni">📱</span><div><b>Always use the same device and the same browser.</b> Your progress is saved on this device only, not online. A new device, private browsing or clearing your history means starting again from zero.</div></aside>
+  <main id="hub" style="display:flex;flex-direction:column;gap:30px"></main>
+  
+</div>
+
+<script>
+/* ================================================================
+   TO ADD A PAGE: add one line in PAGES, in the right section.
+   type: "vocab" (a Vocab Lab page)
+   For a vocab page: key = "vocab-lab:" + the PAGE.key of that page, total = its number of words.
+   Colours: "var(--d1)" … "var(--d8)".
+   ================================================================ */
+const SECTIONS=[
+ {id:"vocab",title:"Synthesis method",sub:"One lab per step of the method: flashcards, quizzes, spelling, match and test."}
+];
+const PAGES=[
+ {s:"vocab",type:"vocab",title:"Spot Vocab Lab",desc:"Read the documents: name them, report the facts, read between the lines, judge the tone.",href:"spot-vocab-lab.html",icon:"🔍",c:"var(--d1)",key:"vocab-lab:spot",total:36},
+ {s:"vocab",type:"vocab",title:"Intro Vocab Lab",desc:"Write the introduction: open the topic, present the documents, raise the problem, announce the plan.",href:"intro-vocab-lab.html",icon:"✍️",c:"var(--d3)",key:"vocab-lab:intro",total:36}
+];
+
+const $=s=>document.querySelector(s);
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function read(k){try{return JSON.parse(localStorage.getItem(k)||"null")}catch(e){return null}}
+function progress(p){
+  const d=p.key?read(p.key):null;
+  if(p.type==="vocab"){const n=d&&d.lv?Object.values(d.lv).filter(v=>v>=3).length:0;return{pct:n/p.total,label:`${n} / ${p.total} words mastered`}}
+  if(p.type==="line"){const n=d&&d.ans?Object.keys(d.ans).length:0;return{pct:Math.min(1,n/p.total),label:n?`${n} / ${p.total} questions answered`:"Not started"}}
+  if(p.type==="colour"){const n=d&&d.hl?Object.keys(d.hl).length:0;return{pct:Math.min(1,n/30),label:n?`${n} notes coloured`:"Not started"}}
+  if(p.type==="intro"){const t=d?["hook","pres","prob","ann"].map(k=>(d[k]||"").trim()).filter(Boolean).join(" "):"";const w=t?t.split(/\s+/).length:0;return{pct:Math.min(1,w/80),label:w?`${w} words written · target 80–100`:"Not started"}}
+  return null;
+}
+function render(){
+  $("#hub").innerHTML=SECTIONS.map(sec=>{
+    const ps=PAGES.filter(p=>p.s===sec.id);if(!ps.length)return"";
+    return`<section class="band"><div class="bandhead"><h2>${esc(sec.title)}</h2><p>${esc(sec.sub)}</p></div><div class="grid">${ps.map(tile).join("")}</div></section>`}).join("");
+}
+function tile(p){
+  const kind="36 words".replace("36",p.total);
+  const pr=progress(p);
+  const inner=`<span class="kind">${kind}</span><span class="ic">${p.icon}</span><h3>${esc(p.title)}</h3><p class="desc">${esc(p.desc)}</p>
+    ${pr?`<span class="prog"><span class="bar"><i style="width:${Math.round(pr.pct*100)}%"></i></span><span>${esc(pr.label)}</span></span>`:""}
+    ${p.type==="soon"?"":`<span class="open">${p.type==="pdf"?"Download the PDF →":"Open →"}</span>`}`;
+  return p.type==="soon"?`<div class="tile soon" style="--c:${p.c}">${inner}</div>`:`<a class="tile" href="${esc(p.href)}" style="--c:${p.c}">${inner}</a>`;
+}
+/* light / dark, shared with the vocab pages */
+function applyMode(m,store){document.documentElement.dataset.theme=m;if(store){try{localStorage.setItem("vocab-lab-mode",m)}catch(e){}}document.querySelectorAll("[data-mode-pick]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.modePick===m))}
+let mode=null;try{mode=localStorage.getItem("vocab-lab-mode")}catch(e){}
+if(mode!=="light"&&mode!=="dark")mode=(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light";
+document.addEventListener("click",e=>{const b=e.target.closest("[data-mode-pick]");if(b)applyMode(b.dataset.modePick,true)});
+applyMode(mode,false);render();
+window.addEventListener("pageshow",render);
+</script>
+</body>
+</html>
