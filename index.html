@@ -97,11 +97,13 @@ a.tile:hover{transform:translateY(-3px);box-shadow:var(--shadow-h)}
    Colours: "var(--d1)" … "var(--d8)".
    ================================================================ */
 const SECTIONS=[
- {id:"vocab",title:"Synthesis method",sub:"One lab per step of the method: flashcards, quizzes, spelling, match and test."}
+ {id:"vocab",title:"Synthesis method",sub:"One lab per step of the method: flashcards, quizzes, spelling, match and test."},
+ {id:"stereo",title:"Stereotypes",sub:"Paul Bloom and Chimamanda Ngozi Adichie: the words to level up from A2 to B2."}
 ];
 const PAGES=[
  {s:"vocab",type:"vocab",title:"Spot Vocab Lab",desc:"Read the documents: name them, report the facts, read between the lines, judge the tone.",href:"spot-vocab-lab.html",icon:"🔍",c:"var(--d1)",key:"vocab-lab:spot",total:36},
- {s:"vocab",type:"vocab",title:"Intro Vocab Lab",desc:"Write the introduction: open the topic, present the documents, raise the problem, announce the plan.",href:"intro-vocab-lab.html",icon:"✍️",c:"var(--d3)",key:"vocab-lab:intro",total:36}
+ {s:"vocab",type:"vocab",title:"Intro Vocab Lab",desc:"Write the introduction: open the topic, present the documents, raise the problem, announce the plan.",href:"intro-vocab-lab.html",icon:"✍️",c:"var(--d3)",key:"vocab-lab:intro",total:36},
+ {s:"stereo",type:"vocab",title:"Level Up Vocab Lab",desc:"Five colours to level up: precise words, logical links, structures, nuance and the sources.",href:"levelup-vocab-lab.html",icon:"🎨",c:"var(--d5)",key:"vocab-lab:levelup",total:36}
 ];
 
 const $=s=>document.querySelector(s);
