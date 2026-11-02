@@ -98,12 +98,14 @@ a.tile:hover{transform:translateY(-3px);box-shadow:var(--shadow-h)}
    ================================================================ */
 const SECTIONS=[
  {id:"vocab",title:"Synthesis method",sub:"One lab per step of the method: flashcards, quizzes, spelling, match and test."},
- {id:"stereo",title:"Stereotypes",sub:"Paul Bloom and Chimamanda Ngozi Adichie: the words to level up from A2 to B2."}
+ {id:"stereo",title:"Stereotypes",sub:"Paul Bloom, Chimamanda Ngozi Adichie and the media's image of India: the words and structures to level up."}
 ];
 const PAGES=[
  {s:"vocab",type:"vocab",title:"Spot Vocab Lab",desc:"Read the documents: name them, report the facts, read between the lines, judge the tone.",href:"spot-vocab-lab.html",icon:"🔍",c:"var(--d1)",key:"vocab-lab:spot",total:36},
  {s:"vocab",type:"vocab",title:"Intro Vocab Lab",desc:"Write the introduction: open the topic, present the documents, raise the problem, announce the plan.",href:"intro-vocab-lab.html",icon:"✍️",c:"var(--d3)",key:"vocab-lab:intro",total:36},
- {s:"stereo",type:"vocab",title:"Level Up Vocab Lab",desc:"Five colours to level up: precise words, logical links, structures, nuance and the sources.",href:"levelup-vocab-lab.html",icon:"🎨",c:"var(--d5)",key:"vocab-lab:levelup",total:36}
+ {s:"stereo",type:"vocab",title:"Level Up Vocab Lab",desc:"Five colours to level up: precise words, logical links, structures, nuance and the sources.",href:"levelup-vocab-lab.html",icon:"🎨",c:"var(--d5)",key:"vocab-lab:levelup",total:36},
+ {s:"stereo",type:"vocab",title:"India Media Vocab Lab",desc:"The class word bank from Rini Mehta's interview: images of India, the media at work, analysing a source.",href:"india-vocab-lab.html",icon:"🪷",c:"var(--d6)",key:"vocab-lab:india",total:23},
+ {s:"stereo",type:"line",title:"Structures Lab",desc:"Fix, build and level up complex sentences (B2+ / C1), many taken from your own work.",href:"structures-lab.html",icon:"🧩",c:"var(--d4)",key:"vocab-lab:structures",total:22}
 ];
 
 const $=s=>document.querySelector(s);
@@ -123,7 +125,7 @@ function render(){
     return`<section class="band"><div class="bandhead"><h2>${esc(sec.title)}</h2><p>${esc(sec.sub)}</p></div><div class="grid">${ps.map(tile).join("")}</div></section>`}).join("");
 }
 function tile(p){
-  const kind="36 words".replace("36",p.total);
+  const kind=p.type==="line"?p.total+" exercises":p.total+" words";
   const pr=progress(p);
   const inner=`<span class="kind">${kind}</span><span class="ic">${p.icon}</span><h3>${esc(p.title)}</h3><p class="desc">${esc(p.desc)}</p>
     ${pr?`<span class="prog"><span class="bar"><i style="width:${Math.round(pr.pct*100)}%"></i></span><span>${esc(pr.label)}</span></span>`:""}
