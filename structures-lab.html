@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Structures Lab</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* "Pop Lab" theme, reusable for every vocab deck: lavender ground, ink outlines with offset "sticker" shadows, one bright colour per deck.
+   Layout: header + deck picker + mode tiles on the home view; each mode opens full-width in the same column. */
+:root{
+  --bg:#f5f2ff; --surface:#ffffff; --sunk:#ebe6fb; --ink:#1b1440; --muted:#5f5885; --line:#d6cff2;
+  --primary:#6b3cf5; --on:#ffffff; --star:#ffbf1f; --star-ink:#2a1d00;
+  --ok:#14945a; --ok-t:#d3f5e3; --no:#e2364a; --no-t:#ffdde1;
+  --d1:#1a7fd9; --d2:#f0533f; --d3:#7a3ff0; --d4:#0f9a74; --d5:#d23f8a; --d6:#c27a00; --d7:#0a8f8f; --d8:#4558e6;
+  --shadow:4px 4px 0 var(--ink);
+  --bw:2.5px; --bw2:2px; --bd:var(--ink); --r:18px;
+  --sh-btn:3px 3px 0 var(--ink); --sh-btn-h:4px 4px 0 var(--ink); --sh-btn-a:1px 1px 0 var(--ink); --sh-h:6px 6px 0 var(--ink);
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#130f27; --surface:#1d1739; --sunk:#181332; --ink:#efeaff; --muted:#a79fd0; --line:#352c5e;
+  --primary:#a184ff; --on:#140f2a; --star:#ffcf4d; --star-ink:#2a1d00;
+  --ok:#5ee0a0; --ok-t:#16402c; --no:#ff7a8a; --no-t:#4f1a24;
+  --d1:#5fb4ff; --d2:#ff8a78; --d3:#b59bff; --d4:#4fd6ae; --d5:#ff8fc8; --d6:#ffc65c; --d7:#5fe0e0; --d8:#8c9bff;
+  --shadow:4px 4px 0 #000; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#130f27; --surface:#1d1739; --sunk:#181332; --ink:#efeaff; --muted:#a79fd0; --line:#352c5e;
+  --primary:#a184ff; --on:#140f2a; --star:#ffcf4d; --star-ink:#2a1d00;
+  --ok:#5ee0a0; --ok-t:#16402c; --no:#ff7a8a; --no-t:#4f1a24;
+  --d1:#5fb4ff; --d2:#ff8a78; --d3:#b59bff; --d4:#4fd6ae; --d5:#ff8fc8; --d6:#ffc65c; --d7:#5fe0e0; --d8:#8c9bff;
+  --shadow:4px 4px 0 #000; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;margin:0}
+.wrap{max-width:980px;margin:0 auto;padding-inline:18px;padding-block:20px 70px;display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{font-family:var(--display);margin:0;letter-spacing:-.015em;text-wrap:balance}
+h1{font-size:2.2em;font-weight:800;line-height:1}
+h2{font-size:1.5em;font-weight:800;line-height:1.1}
+h3{font-size:1.1em;font-weight:700}
+p{margin:0}
+.eyebrow{font-family:var(--mono);font-size:.72em;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--primary);outline-offset:3px}
+
+.pop{background:var(--surface);border:var(--bw) solid var(--bd);border-radius:var(--r);box-shadow:var(--shadow)}
+.btn{border:var(--bw) solid var(--bd);background:var(--surface);border-radius:12px;padding:.45em 1em;font-weight:700;box-shadow:var(--sh-btn);transition:transform .08s,box-shadow .08s}
+.btn:hover{transform:translate(-1px,-1px);box-shadow:var(--sh-btn-h)}
+.btn:active{transform:translate(2px,2px);box-shadow:var(--sh-btn-a)}
+.btn.main{background:var(--primary);color:var(--on)}
+.btn.good{background:var(--ok);color:var(--on)}
+.btn.bad{background:var(--no);color:var(--on)}
+.btn:disabled{opacity:.5;cursor:default;transform:none}
+.ghost{border:0;background:none;color:var(--muted);font-weight:700;padding:.3em .5em;border-radius:8px}
+.ghost:hover{color:var(--ink);background:var(--sunk)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.sp{flex:1}
+
+/* header */
+.top{display:flex;flex-wrap:wrap;gap:14px;align-items:end;justify-content:space-between}
+.top .t{display:flex;flex-direction:column;gap:6px}
+.logo{display:inline-flex;gap:4px;align-items:center}
+.logo i{width:14px;height:14px;border-radius:4px;border:var(--bw2) solid var(--bd);display:inline-block}
+.stats{display:flex;gap:10px}
+.stat{padding:.35em .8em;border-radius:12px;border:var(--bw) solid var(--bd);background:var(--surface);font-family:var(--display);font-weight:800;font-size:1.05em;font-variant-numeric:tabular-nums;display:flex;gap:6px;align-items:baseline}
+.stat small{font-family:var(--mono);font-weight:400;font-size:.6em;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.stat.fire{background:var(--star);color:var(--star-ink)} .stat.fire small{color:var(--star-ink)}
+
+/* deck picker */
+.decks{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:14px}
+.deck{text-align:left;padding:14px 16px;display:flex;flex-direction:column;gap:8px;border:var(--bw) solid var(--bd);border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow);position:relative;min-width:0}
+.deck .num{font-family:var(--display);font-weight:800;font-size:.85em;color:var(--on);background:var(--c);border:var(--bw2) solid var(--bd);border-radius:8px;padding:0 .45em;align-self:flex-start}
+.deck h3{font-size:1.08em;line-height:1.15}
+.deck .bar{height:10px;border-radius:6px;background:var(--sunk);border:var(--bw2) solid var(--bd);overflow:hidden}
+.deck .bar i{display:block;height:100%;background:var(--c)}
+.deck .meta{font-family:var(--mono);font-size:.72em;color:var(--muted)}
+.deck .tick{position:absolute;top:10px;right:10px;width:26px;height:26px;border-radius:50%;border:var(--bw) solid var(--bd);display:grid;place-items:center;font-weight:800;background:var(--surface)}
+.deck[aria-pressed="true"]{background:color-mix(in srgb,var(--c) 16%,var(--surface))}
+.deck[aria-pressed="true"] .tick{background:var(--c);color:var(--on)}
+.filter{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.toggle{border:var(--bw) solid var(--bd);border-radius:999px;padding:.25em .8em;background:var(--surface);font-weight:700;font-size:.88em}
+.toggle[aria-pressed="true"]{background:var(--star);color:var(--star-ink)}
+
+/* mode tiles */
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:14px}
+.mode{padding:16px;text-align:left;display:flex;flex-direction:column;gap:6px;border:var(--bw) solid var(--bd);border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow);transition:transform .1s,box-shadow .1s}
+.mode:hover{transform:translate(-2px,-2px) rotate(-.6deg);box-shadow:var(--sh-h)}
+.mode .ic{width:48px;height:48px;border-radius:14px;border:var(--bw) solid var(--bd);display:grid;place-items:center;font-size:1.5em;background:var(--mc)}
+.mode h3{font-size:1.2em}
+.mode p{font-size:.85em;color:var(--muted)}
+.mode .best{font-family:var(--mono);font-size:.72em;color:var(--muted)}
+
+/* game shell */
+.shell{display:flex;flex-direction:column;gap:18px}
+.gbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.prog{flex:1;min-width:140px;height:14px;border:var(--bw) solid var(--bd);border-radius:8px;background:var(--surface);overflow:hidden}
+.prog i{display:block;height:100%;background:var(--primary);transition:width .25s}
+.count{font-family:var(--mono);font-size:.85em;font-variant-numeric:tabular-nums}
+
+/* flashcards */
+.fc{perspective:1200px;background:none;border:0;padding:0;width:100%;display:block}
+.fc .in{display:block;position:relative;min-height:290px;transition:transform .5s;transform-style:preserve-3d}
+.fc.flip .in{transform:rotateY(180deg)}
+.fc .face{position:absolute;inset:0;backface-visibility:hidden;border:var(--bw) solid var(--bd);border-radius:22px;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px;text-align:center}
+.fc .front{background:var(--surface)}
+.fc .back{background:var(--c);color:var(--on);transform:rotateY(180deg)}
+.fc .word{font-family:var(--display);font-weight:800;font-size:2.4em;line-height:1.05}
+.fc .ipa{font-family:var(--mono);color:var(--muted)}
+.fc .tap{font-family:var(--mono);font-size:.72em;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+.fc .fr{font-family:var(--display);font-weight:800;font-size:1.8em;line-height:1.1}
+.fc .ex{font-style:italic;max-width:46ch}
+.fc .trap{font-size:.85em;background:var(--surface);color:var(--ink);border:var(--bw2) solid var(--bd);border-radius:10px;padding:.3em .7em;max-width:46ch}
+.deckchip{font-family:var(--mono);font-size:.7em;letter-spacing:.06em;text-transform:uppercase;border:var(--bw2) solid var(--bd);border-radius:999px;padding:.1em .6em;background:var(--c);color:var(--on)}
+.icon-btn{border:var(--bw) solid var(--bd);background:var(--surface);border-radius:50%;width:2.4em;height:2.4em;display:inline-grid;place-items:center;font-size:1em;box-shadow:var(--sh-btn)}
+.icon-btn.on{background:var(--star);color:var(--star-ink)}
+@media (prefers-reduced-motion:reduce){.fc .in{transition:none}}
+
+/* question */
+.qcard{padding:22px;display:flex;flex-direction:column;gap:16px}
+.prompt{font-family:var(--display);font-weight:800;font-size:1.9em;line-height:1.1}
+.subp{color:var(--muted)}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:10px}
+.choice{border:var(--bw) solid var(--bd);background:var(--surface);border-radius:14px;padding:.75em .9em;text-align:left;font-weight:700;box-shadow:var(--sh-btn);display:flex;gap:10px;align-items:center}
+.choice .k{font-family:var(--mono);font-size:.75em;border:var(--bw2) solid var(--bd);border-radius:6px;width:1.6em;height:1.6em;display:grid;place-items:center;flex:0 0 auto}
+.choice:hover:not(:disabled){background:var(--sunk)}
+.choice:disabled{cursor:default}
+.choice.right{background:var(--ok-t);border-color:var(--ok)}
+.choice.wrong{background:var(--no-t);border-color:var(--no)}
+.fb{border-radius:14px;padding:.7em 1em;border:var(--bw) solid var(--bd);display:flex;flex-direction:column;gap:4px}
+.fb.good{background:var(--ok-t)} .fb.bad{background:var(--no-t)} .fb.almost{background:color-mix(in srgb,var(--star) 30%,var(--surface))}
+.fb b{font-family:var(--display);font-size:1.1em}
+.typein{display:flex;gap:10px;flex-wrap:wrap}
+.typein input{flex:1;min-width:0;border:var(--bw) solid var(--bd);border-radius:12px;padding:.6em .8em;font-size:1.15em;background:var(--surface)}
+.hintline{font-style:italic;color:var(--muted)}
+
+/* match */
+.mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media (max-width:640px){.mgrid{grid-template-columns:repeat(2,1fr)}}
+.tile{min-height:92px;border:var(--bw) solid var(--bd);border-radius:14px;background:var(--surface);box-shadow:var(--sh-btn);font-weight:700;padding:.6em;line-height:1.25;display:grid;place-items:center;text-align:center;transition:transform .12s,opacity .3s}
+.tile.en{font-family:var(--display);font-size:1.05em}
+.tile.sel{background:var(--primary);color:var(--on);transform:translate(-2px,-2px)}
+.tile.bad{background:var(--no-t);border-color:var(--no);animation:shake .3s}
+.tile.gone{opacity:0;pointer-events:none;transform:scale(.85)}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+@media (prefers-reduced-motion:reduce){.tile.bad{animation:none}}
+.timer{font-family:var(--display);font-weight:800;font-size:1.6em;font-variant-numeric:tabular-nums}
+
+/* results */
+.result{padding:24px;display:flex;flex-direction:column;gap:14px;align-items:flex-start}
+.big{font-family:var(--display);font-weight:800;font-size:3.4em;line-height:1}
+.review{display:flex;flex-direction:column;gap:6px;width:100%}
+.rv{display:grid;grid-template-columns:1.6em 1fr;gap:8px;padding:.5em .7em;border-radius:10px;border:2px solid var(--line);font-size:.92em}
+.rv.ok{background:var(--ok-t);border-color:var(--ok)} .rv.ko{background:var(--no-t);border-color:var(--no)}
+.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:20}
+.confetti i{position:absolute;top:-20px;width:10px;height:14px;border-radius:2px;animation:fall 1.6s ease-in forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+@media (prefers-reduced-motion:reduce){.confetti{display:none}}
+.toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:.55em 1.1em;border-radius:999px;font-weight:700;font-size:.92em;pointer-events:none;opacity:0;transition:opacity .2s;z-index:30}
+.toast.show{opacity:1}
+
+/* ===== SKINS ===== */
+/* Aurora: frosted glass cards over soft colour blobs */
+:root[data-skin="aurora"]{--bg:#f3f0ff;--surface:rgba(255,255,255,.72);--sunk:rgba(120,90,220,.08);--ink:#1d1a3a;--muted:#5d5a80;--line:rgba(120,100,200,.18);
+  --primary:#6d4cff;--on:#fff;--bw:1px;--bw2:1px;--bd:rgba(255,255,255,.85);--r:24px;
+  --shadow:0 12px 32px rgba(70,40,160,.12);--sh-btn:0 6px 16px rgba(70,40,160,.12);--sh-btn-h:0 10px 22px rgba(70,40,160,.18);--sh-btn-a:0 2px 6px rgba(70,40,160,.12);--sh-h:0 18px 40px rgba(70,40,160,.2);
+  --blob1:#c7b6ff;--blob2:#9fe7e0;--blob3:#ffc2d9;--display:"Outfit",system-ui,sans-serif}
+@media (prefers-color-scheme: dark){:root[data-skin="aurora"]:not([data-theme="light"]){--bg:#0e0b22;--surface:rgba(30,24,64,.66);--sunk:rgba(160,140,255,.1);--ink:#f0edff;--muted:#a9a3d6;--line:rgba(160,140,255,.2);--primary:#a18bff;--on:#120d2c;--bd:rgba(255,255,255,.12);--blob1:#3b2a8c;--blob2:#0f5b5a;--blob3:#6b1f4a;--shadow:0 12px 32px rgba(0,0,0,.35);--sh-btn:0 6px 16px rgba(0,0,0,.3);--sh-btn-h:0 10px 22px rgba(0,0,0,.4);--sh-btn-a:0 2px 6px rgba(0,0,0,.3);--sh-h:0 18px 40px rgba(0,0,0,.45)}}
+:root[data-skin="aurora"][data-theme="dark"]{--bg:#0e0b22;--surface:rgba(30,24,64,.66);--sunk:rgba(160,140,255,.1);--ink:#f0edff;--muted:#a9a3d6;--line:rgba(160,140,255,.2);--primary:#a18bff;--on:#120d2c;--bd:rgba(255,255,255,.12);--blob1:#3b2a8c;--blob2:#0f5b5a;--blob3:#6b1f4a;--shadow:0 12px 32px rgba(0,0,0,.35);--sh-btn:0 6px 16px rgba(0,0,0,.3);--sh-btn-h:0 10px 22px rgba(0,0,0,.4);--sh-btn-a:0 2px 6px rgba(0,0,0,.3);--sh-h:0 18px 40px rgba(0,0,0,.45)}
+:root[data-skin="aurora"] body{background:radial-gradient(40vw 40vw at 8% 10%,var(--blob1),transparent 70%),radial-gradient(45vw 45vw at 95% 25%,var(--blob2),transparent 70%),radial-gradient(50vw 50vw at 50% 105%,var(--blob3),transparent 70%),var(--bg);background-attachment:fixed}
+:root[data-skin="aurora"] :is(.pop,.deck,.mode,.btn,.choice,.tile,.stat,.toggle,.icon-btn,.typein input,.fc .front){backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+:root[data-skin="aurora"] .btn{border-radius:999px}
+:root[data-skin="aurora"] .btn.main{background:linear-gradient(120deg,#6d4cff,#e0559b);border-color:transparent;color:#fff}
+:root[data-skin="aurora"] .mode:hover{transform:translateY(-3px)}
+:root[data-skin="aurora"] .mode .ic,:root[data-skin="aurora"] .deck .num{border-color:transparent}
+:root[data-skin="aurora"] .prog i{background:linear-gradient(90deg,#6d4cff,#e0559b)}
+:root[data-skin="aurora"] h1{background:linear-gradient(100deg,#6d4cff,#e0559b 60%,#14a89a);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* Neon: dark arcade, glowing gradients (single dark look) */
+:root[data-skin="neon"]{--bg:#0a0a18;--surface:#14142a;--sunk:#1b1b36;--ink:#eef0ff;--muted:#9a9cc8;--line:#2a2a4d;--primary:#00e5ff;--on:#07071a;
+  --star:#ffe14d;--ok:#3dffa2;--ok-t:#0f3a2a;--no:#ff4d8d;--no-t:#3d1026;--d1:#00e5ff;--d2:#ff4d8d;--d3:#b26bff;--d4:#3dffa2;--d5:#ff9df0;--d6:#ffd24d;--d7:#4dfff0;--d8:#8c9bff;
+  --bw:1.5px;--bw2:1.5px;--bd:#2f2f5a;--r:20px;--shadow:0 0 0 1px rgba(0,229,255,.05),0 10px 30px rgba(0,0,0,.45);--sh-btn:0 0 0 rgba(0,0,0,0);--sh-btn-h:0 0 16px rgba(0,229,255,.35);--sh-btn-a:none;--sh-h:0 0 24px rgba(178,107,255,.45);
+  --display:"Outfit",system-ui,sans-serif;color-scheme:dark}
+:root[data-skin="neon"] body{background:radial-gradient(60vw 40vw at 100% 0%,rgba(178,107,255,.18),transparent 60%),radial-gradient(60vw 40vw at 0% 100%,rgba(0,229,255,.14),transparent 60%),var(--bg);background-attachment:fixed}
+:root[data-skin="neon"] h1{background:linear-gradient(90deg,#00e5ff,#b26bff,#ff4d8d);-webkit-background-clip:text;background-clip:text;color:transparent}
+:root[data-skin="neon"] .btn.main{background:linear-gradient(90deg,#00e5ff,#b26bff);border-color:transparent;color:#07071a}
+:root[data-skin="neon"] .mode:hover,:root[data-skin="neon"] .deck:hover{border-color:var(--mc,var(--c))}
+:root[data-skin="neon"] .mode .ic{border-color:transparent;box-shadow:0 0 18px var(--mc)}
+:root[data-skin="neon"] .deck[aria-pressed="true"]{border-color:var(--c);box-shadow:0 0 22px color-mix(in srgb,var(--c) 45%,transparent)}
+:root[data-skin="neon"] .deck .num,:root[data-skin="neon"] .deckchip{border-color:transparent;color:#07071a}
+:root[data-skin="neon"] .fc .back{color:#07071a;box-shadow:0 0 40px color-mix(in srgb,var(--c) 45%,transparent)}
+:root[data-skin="neon"] .prog i{background:linear-gradient(90deg,#00e5ff,#b26bff,#ff4d8d)}
+:root[data-skin="neon"] .stat.fire{box-shadow:0 0 16px rgba(255,225,77,.5)}
+
+/* light / dark toggle */
+.modetog{display:flex;border:var(--bw2) solid var(--bd);border-radius:999px;background:var(--surface);padding:3px;gap:2px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.modetog button{border:0;background:none;border-radius:999px;padding:.25em .8em;font-weight:700;font-size:.85em;color:var(--muted);display:flex;gap:6px;align-items:center}
+.modetog button[aria-pressed="true"]{background:linear-gradient(120deg,var(--primary),#e0559b);color:#fff}
+.hublink{font-weight:700;font-size:.85em;color:var(--primary);text-decoration:none;align-self:flex-start}
+.hublink:hover{text-decoration:underline}
+.devnote{font-size:.85em;color:var(--muted)}
+.kbd{font-family:var(--mono);font-size:.75em;color:var(--muted)}
+
+/* ===== Structures Lab additions ===== */
+.parts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px}
+.sent{font-family:var(--display);font-weight:700;font-size:1.25em;line-height:1.3}
+.orig{border-left:4px solid var(--no);padding:.4em .8em;background:var(--no-t);border-radius:10px;font-style:italic}
+.chips{display:flex;flex-wrap:wrap;gap:8px;min-height:3em;padding:10px;border-radius:14px;border:var(--bw2) dashed var(--line)}
+.chip{border:var(--bw) solid var(--bd);background:var(--surface);border-radius:10px;padding:.3em .7em;font-weight:700;box-shadow:var(--sh-btn)}
+.chip:disabled{opacity:.25;cursor:default;box-shadow:none}
+.built{border-style:solid;background:var(--sunk)}
+.built .chip{background:var(--primary);color:var(--on)}
+.target{display:inline-block;font-family:var(--mono);font-size:.8em;letter-spacing:.04em;border:var(--bw2) solid var(--bd);border-radius:999px;padding:.15em .7em;background:var(--star);color:var(--star-ink)}
+textarea.rw{width:100%;min-height:5em;border:var(--bw) solid var(--bd);border-radius:12px;padding:.6em .8em;font:inherit;font-size:1.05em;background:var(--surface);color:var(--ink);resize:vertical}
+.model{border-radius:14px;padding:.7em 1em;border:var(--bw) solid var(--bd);background:var(--ok-t)}
+.why{font-size:.92em}
+.done-tag{font-family:var(--mono);font-size:.72em;color:var(--ok)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="t">
+      <a class="hublink" href="index.html">← All vocab labs</a><span class="eyebrow">LLCER AMC · Stereotypes · B2+ / C1 structures</span>
+      <h1>Structures Lab</h1>
+      <p style="color:var(--muted);max-width:58ch">Complex sentences that make an analysis sound B2+ and C1. Many examples come from your own work on Rini Mehta's interview, anonymised: let's fix them together.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-end"><div class="modetog" role="group" aria-label="Light or dark mode"><button data-mode-pick="light">☀️ Light</button><button data-mode-pick="dark">🌙 Dark</button></div><div class="stats"><span class="stat"><span id="done">0</span><small id="dtot"></small></span></div></div>
+  </header>
+  <main id="app" class="shell"></main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+/* ================================================================
+   STRUCTURES LAB · three parts, progress saved under "vocab-lab:structures"
+   FIX: a sentence written in class + 3 versions, only one correct.
+   BUILD: put the words in order (exact sentence).
+   LEVEL UP: rewrite a simple sentence with the target structure, then compare with a model.
+   ================================================================ */
+const FIX=[
+ {orig:"Not only does she include personal perspectives, she also provides examples.",
+  opts:["Not only does she include personal perspectives, but she also provides examples.","Not only she includes personal perspectives, but she also provides examples.","Not only does she includes personal perspectives, but she also provides examples."],a:0,
+  why:"Not only + auxiliary + subject + base verb (inversion), then <b>but</b> (also)."},
+ {orig:"Had they been interviewed, the readers might have a different perspective.",
+  opts:["Had they interviewed, readers might have had a different perspective.","If they had been interviewed, readers might had a different perspective.","Had they been interviewed, readers might have had a different perspective."],a:2,
+  why:"Third conditional without <i>if</i>: <b>Had + subject + past participle</b>, then <b>might / would have + past participle</b>."},
+ {orig:"Whether the students are open or not to debate.",
+  opts:["Whether the cover is offensive or not to debate.","Whether the cover is offensive or not is open to debate.","It is open to debate whether is the cover offensive."],a:1,
+  why:"<b>Whether… or not</b> is the subject of the sentence: it needs a verb, <b>is open to debate</b>. No inversion after <i>whether</i>."},
+ {orig:"Because they are not given the right to reply, which makes the article somewhat one-sided.",
+  opts:["Because they are not given the right to reply, the article is somewhat one-sided.","They are not given the right to reply, which make the article somewhat one-sided.","Because they are not given the right to reply, which makes the article somewhat one-sided."],a:0,
+  why:"<i>Because…</i> is only half a sentence: add a main clause. Or drop <i>because</i> and keep <b>, which makes…</b> (with an -s)."},
+ {orig:"This raises the question of is it really what they think.",
+  opts:["This raises the question of whether is it really what they think.","This raises the question if it is really what they think about.","This raises the question of whether it is really what they think."],a:2,
+  why:"<b>raise the question of whether</b> + normal word order (subject + verb): <i>whether it is</i>, not <i>whether is it</i>."},
+ {orig:"Far form being purely academic, she neither is commited but a mix of both.",
+  opts:["Far from being purely academic, Mehta is also clearly committed.","Far from to be purely academic, Mehta is also clearly committed.","Far of being purely academic, Mehta is also clearly committed."],a:0,
+  why:"<b>Far from + -ing</b> = loin de… Spelling: <i>from</i>, <i>committed</i> (double m, double t)."},
+ {orig:"Western media tend to reduce Indians as hard-working exotic people.",
+  opts:["Western media tend to reduce Indians like hard-working exotic people.","Western media tend to reduce Indians to hard-working exotic people.","Western media tends to reduce Indians in hard-working exotic people."],a:1,
+  why:"<b>reduce someone to</b> something. And <i>the media</i> is plural here: <i>media tend</i>."},
+ {orig:"Although some said to have found the cover offensive, others said it's better to be misrepresented.",
+  opts:["Although Indians said to have found the cover offensive, but they are never quoted.","Although Indians are said to have found the cover offensive, they are never quoted.","Although Indians are said to find the cover offensive, but they are never quoted."],a:1,
+  why:"<b>be said to have + past participle</b> (passive). And never <i>although… but</i> in the same sentence."},
+ {orig:"As a specialist on comparative and world literature, the reader can trust her analysis.",
+  opts:["As a specialist in literature, the reader trusts her analysis.","Being a specialist in literature, the reader can trust her.","As a specialist in literature, she can be trusted by the reader."],a:2,
+  why:"The beginning (<i>As a specialist…</i>) must describe the subject that follows: <b>she</b> is the specialist, not the reader."}
+];
+const BUILD=[
+ "Not only does Mehta criticise the media, but she also mentions Bollywood's flaws.",
+ "Had the creators been interviewed, we might have understood their intentions.",
+ "Rather than mirroring reality, Bollywood sells a fantasy.",
+ "It would be misleading to assume that all Indians share the same opinion.",
+ "These stereotypes are rooted in the European imagination.",
+ "While Bollywood offers hope, it nevertheless conveys regressive images."
+];
+const REWRITE=[
+ {s:"Mehta criticises the media. She also criticises Bollywood.",t:"Not only… but also…",re:/not only (does|did|is|has)\b.*\bbut\b/i,m:"Not only does Mehta criticise the media, but she also criticises Bollywood."},
+ {s:"The creators were not interviewed, so we don't know their intentions.",t:"Had… (no if)",re:/^\s*had\s+(\w+\s+){1,5}(been|\w+ed)\b/i,m:"Had the creators been interviewed, we might have known their intentions."},
+ {s:"Some students find the cover offensive. Others don't.",t:"…, whereas…",re:/,\s*whereas\b/i,m:"Some students find the cover offensive, whereas others do not."},
+ {s:"Mehta is not neutral. She is committed.",t:"Far from + -ing…",re:/far from \w+ing\b/i,m:"Far from being neutral, Mehta is clearly committed."},
+ {s:"The Simpsons is a good example. Homer is treated like a god.",t:"A case in point is…, in which…",re:/a case in point is.*\bin which\b/i,m:"A case in point is The Simpsons, in which the Indian workers revere Homer as a god."},
+ {s:"We don't know if the cover is offensive. People disagree.",t:"Whether… or not is open to debate.",re:/^\s*whether\b.*\bis open to debate/i,m:"Whether the cover is offensive or not is open to debate."},
+ {s:"Mehta speaks about all Indians. Can she do that?",t:"This raises the question of whether…",re:/raises the question of whether \w+ (can|could|is|should|has)\b/i,m:"This raises the question of whether Mehta can speak on behalf of all Indians."}
+];
+const TOTAL=FIX.length+BUILD.length+REWRITE.length;
+const KEY="vocab-lab:structures";
+let S={ans:{}};try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s&&s.ans)S=s}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const $=s=>document.querySelector(s);const app=$("#app");
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const doneIn=p=>Object.keys(S.ans).filter(k=>k[0]===p).length;
+function stats(){$("#done").textContent=Object.keys(S.ans).length;$("#dtot").textContent="/ "+TOTAL+" done"}
+let tt;function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("show"),1500)}
+function mark(id){if(!S.ans[id]){S.ans[id]=true;save();stats()}}
+const shellTop=(title,prog,count)=>`<div class="gbar"><button class="btn" data-home>← Parts</button><h2>${title}</h2><span class="prog"><i style="width:${prog*100}%"></i></span><span class="count">${count}</span></div>`;
+app.addEventListener("click",e=>{if(e.target.closest("[data-home]"))home()});
+const finish=(title,again)=>{app.innerHTML=shellTop(title,1,"✓")+`<div class="pop result"><span class="eyebrow">Part complete</span><div class="big">Well done!</div><p>Reuse these structures in your next analysis: that is how they become yours.</p><div class="row"><button class="btn main" id="again">Do it again</button><button class="btn" data-home>Back to the parts</button></div></div>`;$("#again").onclick=again};
+
+/* HOME */
+function home(){
+  const parts=[
+   {k:"fix",ic:"🛠️",name:"1. Fix it",p:"Sentences from your work: pick the correct version.",n:FIX.length,d:doneIn("f"),mc:"var(--d2)"},
+   {k:"build",ic:"🧩",name:"2. Build it",p:"Put the words in the right order.",n:BUILD.length,d:doneIn("b"),mc:"var(--d4)"},
+   {k:"rewrite",ic:"🚀",name:"3. Level it up",p:"Rewrite a simple sentence with a C1 structure.",n:REWRITE.length,d:doneIn("r"),mc:"var(--star)"}];
+  app.innerHTML=`<section style="display:flex;flex-direction:column;gap:12px"><h2>Choose a part</h2>
+   <div class="parts">${parts.map(m=>`<button class="mode" data-part="${m.k}" style="--mc:${m.mc}"><span class="ic">${m.ic}</span><h3>${m.name}</h3><p>${m.p}</p><span class="best">${m.d} / ${m.n} done</span></button>`).join("")}</div></section>
+   <p class="devnote">📱 Always use the same device and browser: your progress is saved here only.</p>
+   <section class="row"><span class="sp"></span><button class="ghost" id="wipe">Reset my progress</button></section>`;
+  app.querySelectorAll("[data-part]").forEach(b=>b.onclick=()=>({fix,build,rewrite})[b.dataset.part]());
+  let armed=false;$("#wipe").onclick=e=>{if(!armed){armed=true;e.target.textContent="Click again to erase everything";setTimeout(()=>{armed=false;e.target.textContent="Reset my progress"},3000);return}S={ans:{}};save();stats();home();toast("Progress erased")};
+}
+
+/* 1. FIX IT */
+function fix(){
+  let i=0;
+  function draw(){
+    if(i>=FIX.length){finish("Fix it",fix);return}
+    const q=FIX[i];const order=shuffle(q.opts.map((t,k)=>({t,k})));
+    app.innerHTML=shellTop("Fix it",i/FIX.length,`${i+1}/${FIX.length}`)+`<div class="pop qcard">
+      <span class="eyebrow">Written in class</span><p class="orig">“${esc(q.orig)}”</p>
+      <p class="subp">Which version is correct?</p>
+      <div class="choices" style="grid-template-columns:1fr">${order.map((o,j)=>`<button class="choice" data-k="${o.k}"><span class="k">${j+1}</span>${esc(o.t)}</button>`).join("")}</div><div id="fb"></div></div>`;
+    app.querySelectorAll(".choice").forEach(b=>b.onclick=()=>{
+      if(app.querySelector(".choice:disabled"))return;const k=+b.dataset.k,ok=k===q.a;if(ok)mark("f"+i);
+      app.querySelectorAll(".choice").forEach(c=>{c.disabled=true;if(+c.dataset.k===q.a)c.classList.add("right");else if(c===b)c.classList.add("wrong")});
+      $("#fb").innerHTML=`<div class="fb ${ok?"good":"bad"}"><b>${ok?"Spot on!":"Not quite."}</b><span class="why">${q.why}</span></div><div class="row" style="margin-top:10px"><button class="btn main" id="nx">Continue →</button></div>`;
+      $("#nx").onclick=()=>{i++;draw()};$("#nx").focus()});
+  }
+  draw();
+}
+
+/* 2. BUILD IT */
+function build(){
+  let i=0;
+  function draw(){
+    if(i>=BUILD.length){finish("Build it",build);return}
+    const target=BUILD[i].split(" ");let pool=shuffle(target.map((w,k)=>({w,k})));
+    if(pool.map(p=>p.w).join(" ")===BUILD[i])pool=pool.reverse();
+    let built=[];
+    function paint(){
+      app.innerHTML=shellTop("Build it",i/BUILD.length,`${i+1}/${BUILD.length}`)+`<div class="pop qcard">
+        <p class="subp">Click the words in the right order. Click a word in your sentence to send it back.</p>
+        <div class="chips built" id="built">${built.map((p,j)=>`<button class="chip" data-back="${j}">${esc(p.w)}</button>`).join("")||'<span class="hintline">Your sentence…</span>'}</div>
+        <div class="chips">${pool.map((p,j)=>`<button class="chip" data-take="${j}" ${built.includes(p)?"disabled":""}>${esc(p.w)}</button>`).join("")}</div>
+        <div class="row"><button class="btn main" id="chk" ${built.length<target.length?"disabled":""}>Check</button><button class="ghost" id="clr">Start again</button><button class="ghost" id="skip">Show the answer</button></div><div id="fb"></div></div>`;
+      app.querySelectorAll("[data-take]").forEach(b=>b.onclick=()=>{built.push(pool[+b.dataset.take]);paint()});
+      app.querySelectorAll("[data-back]").forEach(b=>b.onclick=()=>{built.splice(+b.dataset.back,1);paint()});
+      $("#clr").onclick=()=>{built=[];paint()};
+      $("#skip").onclick=()=>result(false,true);
+      $("#chk").onclick=()=>result(built.map(p=>p.w).join(" ")===BUILD[i],false);
+    }
+    function result(ok,shown){
+      if(ok)mark("b"+i);
+      $("#fb").innerHTML=`<div class="fb ${ok?"good":"bad"}"><b>${ok?"Perfect!":shown?"Here it is:":"Not yet: try again or look at the answer."}</b>${ok||shown?`<span class="sent">${esc(BUILD[i])}</span>`:""}</div>
+        <div class="row" style="margin-top:10px">${ok||shown?'<button class="btn main" id="nx">Continue →</button>':""}</div>`;
+      if(ok||shown){app.querySelectorAll(".chip,#chk,#clr,#skip").forEach(x=>x.disabled=true);$("#nx").onclick=()=>{i++;draw()};$("#nx").focus()}
+    }
+    paint();
+  }
+  draw();
+}
+
+/* 3. LEVEL IT UP */
+function rewrite(){
+  let i=0;
+  function draw(){
+    if(i>=REWRITE.length){finish("Level it up",rewrite);return}
+    const q=REWRITE[i];
+    app.innerHTML=shellTop("Level it up",i/REWRITE.length,`${i+1}/${REWRITE.length}`)+`<div class="pop qcard">
+      <span class="eyebrow">Simple version</span><p class="sent">${esc(q.s)}</p>
+      <p>Rewrite it in one sentence with: <span class="target">${esc(q.t)}</span></p>
+      <textarea class="rw" id="rw" placeholder="Write your sentence here…" spellcheck="false"></textarea>
+      <div class="row"><button class="btn main" id="chk">Check my structure</button><button class="ghost" id="show">Show a model answer</button></div><div id="fb"></div></div>`;
+    $("#rw").focus();
+    const reveal=(head,cls)=>{mark("r"+i);$("#fb").innerHTML=`<div class="fb ${cls}"><b>${head}</b><span>Model answer:</span><span class="sent">${esc(q.m)}</span><span class="why">Compare: spelling, verb forms, punctuation. Other correct answers are possible.</span></div><div class="row" style="margin-top:10px"><button class="btn main" id="nx">Continue →</button></div>`;$("#nx").onclick=()=>{i++;draw()}};
+    $("#chk").onclick=()=>{const v=$("#rw").value.trim();if(v.split(/\s+/).length<5){toast("Write a full sentence first");return}
+      if(q.re.test(v))reveal("Structure spotted ✓","good");
+      else $("#fb").innerHTML=`<div class="fb almost"><b>The structure isn't there yet.</b><span>Use exactly: <span class="target">${esc(q.t)}</span> Check the word order, then try again.</span></div>`};
+    $("#show").onclick=()=>reveal("Here is one way to say it.","almost");
+  }
+  draw();
+}
+
+/* light / dark, shared with the other labs */
+let mode=null;try{mode=localStorage.getItem("vocab-lab-mode")}catch(e){}
+if(mode!=="light"&&mode!=="dark")mode=(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light";
+function applyMode(m,store){const r=document.documentElement;r.dataset.skin=m==="dark"?"neon":"aurora";r.dataset.theme=m;if(store){try{localStorage.setItem("vocab-lab-mode",m)}catch(e){}}document.querySelectorAll("[data-mode-pick]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.modePick===m))}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-mode-pick]");if(b)applyMode(b.dataset.modePick,true)});
+applyMode(mode,false);stats();home();
+</script>
+</body>
+</html>
